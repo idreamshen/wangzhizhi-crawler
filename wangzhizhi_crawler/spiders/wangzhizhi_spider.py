@@ -9,6 +9,7 @@ from wangzhizhi_crawler.entity.store_user import StoreUser
 
 import scrapy
 import json
+from datetime import datetime
 
 # 初始化数据库连接:
 engine = create_engine('mysql+pymysql://root:zzhjrTJ2jRb2G7MS7Zzi93NuERSEpsXE@192.168.89.81:32426/wangzhizhi')
@@ -20,13 +21,14 @@ class WangzhizhiSpider(scrapy.Spider):
     name = "wangzhizhi"
 
     def start_requests(self):
-        city_url = "https://wxa.wangzhizhi.mored.tech/opsli-boot/api/v1/applet/fp/store/org/getStoreArea?appId=wxa5cf43f677b9a059"
-        yield scrapy.Request(url=city_url, callback=self.parse_city, meta={
-            'request_url': city_url
-        })
+        req_url = "https://wxa.wangzhizhi.mored.tech/opsli-boot/api/v1/applet/fp/store/org/getStoreArea"
+        req_params = {
+            "appId": "wxa5cf43f677b9a059"
+        }
+        yield scrapy.FormRequest(url=req_url, formdata=req_params, method='GET', callback=self.parse_city)
 
     def parse_city(self, response):
-        self.save_crawler_log('city', response.meta['request_url'], response.body)
+        self.save_crawler_log('city', response)
 
         body = json.loads(response.body)
         for v in body['data']['areaResults']:
@@ -38,15 +40,20 @@ class WangzhizhiSpider(scrapy.Spider):
 
             yield item
 
+            req_url = "https://wxa.wangzhizhi.mored.tech/opsli-boot/api/v1/applet/fp/store/org/getStoreBrief"
+            req_params = {
+                "pageNo": "1",
+                "pageSize": "500",
+                "cityId": str(item['city_id']),
+                "appId": "wxa5cf43f677b9a059"
+            }
 
-            store_url = f"https://wxa.wangzhizhi.mored.tech/opsli-boot/api/v1/applet/fp/store/org/getStoreBrief?pageNo=1&pageSize=500&cityId={item['city_id']}&appId=wxa5cf43f677b9a059"
-            yield scrapy.Request(store_url, callback=self.parse_store, meta={
+            yield scrapy.FormRequest(url=req_url, formdata=req_params, method="GET", callback=self.parse_store, meta={
                 'city_id': item['city_id'],
-                'request_url': store_url
             })
     
     def parse_store(self, response):
-        self.save_crawler_log('store', response.meta['request_url'], response.body)
+        self.save_crawler_log('store', response)
 
         body = json.loads(response.body)
         for v in body['data']['storeBriefList']:
@@ -66,15 +73,22 @@ class WangzhizhiSpider(scrapy.Spider):
 
             yield item
 
-            seat_url = f"https://wxa.wangzhizhi.mored.tech/opsli-boot/api/v1/applet/store/live_situation/query?storeId={item['store_id']}&endTime=2024-07-16%2023%3A59%3A59&startTime=2024-07-16%2000%3A00%3A00&appId=wxa5cf43f677b9a059&chooseWay=1"
-            yield scrapy.Request(seat_url, callback=self.parse_seat, meta={
+            req_url = f"https://wxa.wangzhizhi.mored.tech/opsli-boot/api/v1/applet/store/live_situation/query"
+            today_str = datetime.now().strftime("%Y-%m-%d")
+            req_params = {
+                "storeId": str(item['store_id']),
+                "startTime": f"{today_str} 00:00:00",
+                "endTime": f"{today_str} 23:59:59",
+                "appId": "wxa5cf43f677b9a059",
+                "chooseWay": "1"
+            }
+            yield scrapy.FormRequest(url=req_url, formdata=req_params, method="GET", callback=self.parse_seat, meta={
                 'city_id': item['city_id'],
                 'store_id': item['store_id'],
-                'request_url': seat_url
             })
 
     def parse_seat(self, response):
-        self.save_crawler_log('seat', response.meta['request_url'], response.body)
+        self.save_crawler_log('seat', response)
 
         body = json.loads(response.body)
         if 'data' not in body:
@@ -105,12 +119,12 @@ class WangzhizhiSpider(scrapy.Spider):
 
                 yield item
 
-    def save_crawler_log(self, crawler_type, request_url, response_body):
+    def save_crawler_log(self, crawler_type, response):
         with DBSession() as session:
             new_crawler_log = CrawlerLog(
                 crawler_type=crawler_type, 
-                request_url=request_url,
-                response_body=response_body
+                request_url=response.url,
+                response_body=response.body
             )
             session.add(new_crawler_log)
             session.commit()
