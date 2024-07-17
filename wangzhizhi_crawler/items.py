@@ -5,6 +5,10 @@
 
 import scrapy
 
+class CrawlerItem(scrapy.Item):
+    crawler_type = scrapy.Field()
+    request_url = scrapy.Field()
+    response_body = scrapy.Field()
 
 class CityItem(scrapy.Item):
     # define the fields for your item here like:
@@ -25,6 +29,7 @@ class StoreItem(scrapy.Item):
     seat_current_used = scrapy.Field()
 
 class SeatItem(scrapy.Item):
+    response_time = scrapy.Field()
     city_id = scrapy.Field()
     store_id = scrapy.Field()
     room_id = scrapy.Field()
@@ -35,3 +40,11 @@ class SeatItem(scrapy.Item):
     coordinate_y = scrapy.Field()
     user_id = scrapy.Field()
     status = scrapy.Field()
+
+class SeatOccupyItem(scrapy.Item):
+    city_id = scrapy.Field()
+    store_id = scrapy.Field()
+    seat_id = scrapy.Field()
+    user_id = scrapy.Field()
+    start_time = scrapy.Field()
+    end_time = scrapy.Field()

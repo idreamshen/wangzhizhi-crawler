@@ -7,6 +7,8 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
+import os
+
 BOT_NAME = "wangzhizhi_crawler"
 
 SPIDER_MODULES = ["wangzhizhi_crawler.spiders"]
@@ -25,7 +27,7 @@ ROBOTSTXT_OBEY = False
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 0.5
+DOWNLOAD_DELAY = 0.1
 # The download delay setting will honor only one of:
 CONCURRENT_REQUESTS_PER_DOMAIN = 3
 CONCURRENT_REQUESTS_PER_IP = 3
@@ -38,7 +40,7 @@ CONCURRENT_REQUESTS_PER_IP = 3
 
 # Override the default request headers:
 DEFAULT_REQUEST_HEADERS = {
-   "Authorization": "",
+   "Authorization": os.environ["HEADER_AUTH"],
    "Referer": "https://servicewechat.com/wxa5cf43f677b9a059/133/page-frame.html",
 }
 
@@ -63,7 +65,11 @@ DEFAULT_REQUEST_HEADERS = {
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   "wangzhizhi_crawler.pipelines.WangzhizhiPipeline": 300,
+   "wangzhizhi_crawler.pipelines.CrawlerItemPipeline": 301,
+   "wangzhizhi_crawler.pipelines.CityItemPipeline": 302,
+   "wangzhizhi_crawler.pipelines.StoreItemPipeline": 303,
+   "wangzhizhi_crawler.pipelines.SeatItemPipeline": 304,
+   "wangzhizhi_crawler.pipelines.SeatOccupyItemPipeline": 305,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
