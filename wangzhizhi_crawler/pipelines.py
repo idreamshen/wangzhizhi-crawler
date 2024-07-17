@@ -11,11 +11,11 @@ from wangzhizhi_crawler.items import CrawlerItem, CityItem, StoreItem, SeatItem,
 from wangzhizhi_crawler.entity.crawler_log import CrawlerLog
 from wangzhizhi_crawler.entity.city import City
 from wangzhizhi_crawler.entity.store import Store
+from wangzhizhi_crawler.entity.store_seat_stats import StoreSeatStats
+from wangzhizhi_crawler.entity.store_user import StoreUser
 from wangzhizhi_crawler.entity.seat import Seat
 from wangzhizhi_crawler.entity.seat_occupy import SeatOccupy
-from wangzhizhi_crawler.entity.store_user import StoreUser
 from wangzhizhi_crawler.db import DBSession
-
 
 
 class WangzhizhiPipeline:
@@ -69,7 +69,12 @@ class StoreItemPipeline:
     def process_item(self, item, spider):
         if not isinstance(item, StoreItem):
             return item
-        
+
+        self.save_store(item)
+        self.save_store_seat_stats(item)
+        return item
+    
+    def save_store(self, item):
         with DBSession() as session:
             num = session.query(Store).filter(
                 and_(
@@ -107,7 +112,19 @@ class StoreItemPipeline:
 
             session.commit()
 
-        return item
+    def save_store_seat_stats(self, item):
+        with DBSession() as session:
+            
+            new_entity = StoreSeatStats(
+                city_id = item['city_id'], 
+                store_id = item['store_id'], 
+                seat_all = item['seat_all'],
+                seat_current_used = item['seat_current_used'],
+            )
+            session.add(new_entity)
+            print(new_entity)
+            
+            session.commit()
 
 class SeatItemPipeline:
     def process_item(self, item, spider):
