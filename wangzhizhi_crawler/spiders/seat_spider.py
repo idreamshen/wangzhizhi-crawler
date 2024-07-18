@@ -56,19 +56,19 @@ class SeatSpider(BaseSpider):
 
                 yield item
 
-                req_url = f"https://wxa.wangzhizhi.mored.tech/opsli-boot/api/v1/applet/seat/querySeatSpareTime"
-                today_str = datetime.now().strftime("%Y-%m-%d")
-                req_params = {
-                    "storeId": str(item['store_id']),
-                    "spaceId": str(item['space_id']),
-                    "seatId": str(item["seat_id"]),
-                    "studyBeginTime": f"{today_str} 00:00:00",
-                    "studyEndTime": f"{today_str} 23:59:59",
-                    "appId": "wxa5cf43f677b9a059",
-                }
-                yield scrapy.FormRequest(url=req_url, formdata=req_params, method="GET", callback=self.parse_seat_occupy, meta={
-                    'seat_item': item,
-                })
+                # req_url = f"https://wxa.wangzhizhi.mored.tech/opsli-boot/api/v1/applet/seat/querySeatSpareTime"
+                # today_str = datetime.now().strftime("%Y-%m-%d")
+                # req_params = {
+                #     "storeId": str(item['store_id']),
+                #     "spaceId": str(item['space_id']),
+                #     "seatId": str(item["seat_id"]),
+                #     "studyBeginTime": f"{today_str} 00:00:00",
+                #     "studyEndTime": f"{today_str} 23:59:59",
+                #     "appId": "wxa5cf43f677b9a059",
+                # }
+                # yield scrapy.FormRequest(url=req_url, formdata=req_params, method="GET", callback=self.parse_seat_occupy, meta={
+                #     'seat_item': item,
+                # })
 
     def parse_seat_occupy(self, response):
         yield self.parse_crawler_item('seat_occupy', response)
