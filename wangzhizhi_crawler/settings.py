@@ -41,7 +41,7 @@ CONCURRENT_REQUESTS_PER_IP = 3
 # Override the default request headers:
 DEFAULT_REQUEST_HEADERS = {
    "Authorization": os.environ["HEADER_AUTH"],
-   "Referer": "https://servicewechat.com/wxa5cf43f677b9a059/133/page-frame.html",
+   "Referer": "https://servicewechat.com/wxa5cf43f677b9a059/139/page-frame.html",
 }
 
 # Enable or disable spider middlewares
